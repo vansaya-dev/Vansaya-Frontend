@@ -628,7 +628,10 @@ function SignUp() {
                                     <Stack mt={2} gap={1}>
                                         <Typography
                                             variant='caption'
-                                            sx={{ color: '#b3b3b3' }}
+                                            sx={{ 
+                                                color: '#b3b3b3',
+                                                fontFamily: 'Futura light',
+                                             }}
                                         >
                                             Enter OTP(sent on email):
                                         </Typography>
@@ -773,7 +776,10 @@ function SignUp() {
                                     <Stack mt={2} gap={1}>
                                         <Typography
                                             variant='caption'
-                                            sx={{ color: '#b3b3b3' }}
+                                            sx={{ 
+                                                color: '#b3b3b3',
+                                                fontFamily: 'Futura light',
+                                             }}
                                         >
                                             Enter OTP(sent on email):
                                         </Typography>
