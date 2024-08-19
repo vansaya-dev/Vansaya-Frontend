@@ -4,11 +4,13 @@ import React, { useEffect, useState } from 'react';
 import { Field, FormikProvider, useFormik } from 'formik';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import * as Yup from 'yup';
-import { Fahkwang } from 'next/font/google';
+import { Cookie, Fahkwang } from 'next/font/google';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import OTPInput from 'react-otp-input';
 import { useRouter } from 'next/navigation';
+import axiosHttp from '../api/_api-interceptor';
+import Cookies from 'js-cookie';
 
 const fahkwang = Fahkwang({ subsets: ['latin'], weight: ['400'] });
 
@@ -72,10 +74,13 @@ const theme = createTheme({
 function SignUp() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
+    const [otpTime, setOtpTime] = useState(0);
     const [newPassword, setNewPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [snackbarState, setSnackbarState] = useState({
         open: false,
-        message: ''
+        message: '',
+        type: 'success'
     });
     const [state, setState] = useState({
         sendOtp: false,
@@ -85,7 +90,13 @@ function SignUp() {
     })
 
     const validationSchemaEmail = Yup.object().shape({
-        password: Yup.string().required('Password is required'),
+        password: Yup.string()
+            .required('Password is required')
+            .min(6, 'Password must be at least 6 characters')
+            .matches(
+                /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/,
+                'Password must contain at least one special character, one letter, and one number'
+            ),
         email: Yup.string().email('Invalid email address').required('Email is required')
     });
     const validationSchemaPhone = Yup.object().shape({
@@ -111,7 +122,7 @@ function SignUp() {
                 verifyRegisterOtp(values)
             }
             else if (formik.values.signup) {
-                handleRegister(values);
+                sendForRegisterOtp(values);
             }
             else {
                 handleLogin(values);
@@ -133,10 +144,10 @@ function SignUp() {
         validationSchema: forgotSchema,
         onSubmit: (values) => {
             if (state.sendOtp) {
-                handleValidateForgetOtp();
+                handleValidateForgetOtp(values);
             }
             else {
-                handleSendForgetOtp();
+                handleSendForgetOtp(values);
             }
 
         },
@@ -160,7 +171,7 @@ function SignUp() {
         },
     });
     const handleResetPassword = async () => {
-        setSnackbarState((prev) => ({ message: 'New Password Created Successfully!', open: true }))
+        setSnackbarState((prev) => ({ message: 'New Password Created Successfully!', open: true, type: 'success' }))
         setTimeout(() => {
             setSnackbarState((prev) => ({ open: false }))
         }, 2500);
@@ -172,31 +183,141 @@ function SignUp() {
     }
 
     const verifyRegisterOtp = async (values) => {
-        setState({
-            sendOtp: false,
-            phone: false,
-            registerOtp: false,
-            forgotPassword: false
-        })
-        setSnackbarState((prev) => ({ message: 'Account created successfully!', open: true }))
-        setTimeout(() => {
-            setSnackbarState((prev) => ({ open: false }))
-            router.push('/')
-        }, 2500);
-        formik.resetForm();
+
+        setIsLoading(true);
+        try {
+            let body = {
+                email: values.email,
+                otp: values.otp
+            }
+
+            let response = await axiosHttp.post('/verify-otp?new=true', body);
+
+            if (response.status == 200) {
+
+                setSnackbarState((prev) => ({ message: response.data.message, open: true, type: 'success' }))
+                setTimeout(() => {
+                    setSnackbarState((prev) => ({ open: false }))
+                }, 2500);
+                await registerUser(values);
+
+            }
+        }
+        catch (error) {
+
+            setSnackbarState((prev) => ({ message: error.response.data.message, open: true, type: 'error' }))
+            setTimeout(() => {
+                setSnackbarState((prev) => ({ ...prev, open: false }))
+            }, 2500);
+        }
+        setIsLoading(false);
     };
 
 
-    const handleRegister = async () => {
-        setState((prev) => ({ ...prev, registerOtp: true }))
-        // formik.resetForm();
+    const registerUser = async (values) => {
+
+        setIsLoading(true);
+        try {
+            let body = {
+                email: values.email,
+                password: values.password
+            }
+
+            let response = await axiosHttp.post('/register', body);
+
+            if (response.status >= 200 && response.status <= 399) {
+                setSnackbarState((prev) => ({ message: response.data.message, open: true, type: 'success' }))
+                setTimeout(() => {
+                    setSnackbarState((prev) => ({ open: false }))
+                    router.back();
+                }, 2500);
+
+            }
+        }
+        catch (error) {
+
+            setSnackbarState((prev) => ({ message: error.response.data.message, open: true, type: 'error' }))
+            setTimeout(() => {
+                setSnackbarState((prev) => ({ ...prev, open: false }))
+            }, 3500);
+        }
+        setIsLoading(false);
+
+    }
+
+    const sendForRegisterOtp = async (values) => {
+
+        setIsLoading(true);
+        try {
+            let body = {
+                email: values.email,
+            }
+
+            let response = await axiosHttp.post('/send-otp?new=true', body);
+
+            if (response.status == 200) {
+
+                setState((prev) => ({ ...prev, registerOtp: true }))
+
+                setOtpTime(10);
+                const intervalId = setInterval(() => {
+                    setOtpTime((prev) => (prev - 1));
+                }, 1000);
+
+                setTimeout(() => {
+                    clearInterval(intervalId);
+                }, 10000);
+
+
+                setSnackbarState((prev) => ({ message: response.data.message, open: true, type: 'success' }))
+                setTimeout(() => {
+                    setSnackbarState((prev) => ({ open: false }))
+                }, 2500);
+            }
+        }
+        catch (error) {
+            setSnackbarState((prev) => ({ message: error.response.data.message, open: true, type: 'error' }))
+            setTimeout(() => {
+                setSnackbarState((prev) => ({ ...prev, open: false }))
+            }, 2500);
+        }
+        setIsLoading(false);
+
     };
 
 
-    const handleLogin = async () => {
-        formik.resetForm();
-    };
+    const handleLogin = async (values) => {
 
+        setIsLoading(true);
+        try {
+            let body = {
+                email: values.email,
+                password: values.password
+            }
+
+            let response = await axiosHttp.post('/login', body);
+            if (response.data.statusCode === 200) {
+                setSnackbarState((prev) => ({ message: response.data.message, open: true, type: 'success' }))
+                setTimeout(() => {
+                    setSnackbarState((prev) => ({ open: false }))
+                    router.back();
+                }, 2500);
+
+                Cookies.set('token', response.data.data, { expires: 7 });
+                formik.resetForm();
+
+            }
+        }
+        catch (error) {
+
+            setSnackbarState((prev) => ({ message: error.response.data.message, open: true, type: 'error' }))
+            setTimeout(() => {
+                setSnackbarState((prev) => ({ ...prev, open: false }))
+            }, 2500);
+        }
+
+        setIsLoading(false);
+    };
 
     const handleClickShowPassword = () => {
         setShowPassword(!showPassword);
@@ -208,20 +329,82 @@ function SignUp() {
 
 
 
-    const handleSendForgetOtp = async () => {
-        setState((prev) => ({ ...prev, sendOtp: true }));
+    const handleSendForgetOtp = async (values) => {
+
+        setIsLoading(true);
+        try {
+            let body = {
+                email: values.forgottedEmail,
+            }
+
+            let response = await axiosHttp.post('/send-otp?new=false', body);
+
+            if (response.status >= 200 && response.status <= 399) {
+
+                setState((prev) => ({ ...prev, sendOtp: true }));
+
+                setOtpTime(10);
+                const intervalId = setInterval(() => {
+                    setOtpTime((prev) => (prev - 1));
+                }, 1000);
+
+                setTimeout(() => {
+                    clearInterval(intervalId);
+                }, 10000);
+
+                setSnackbarState((prev) => ({ message: response.data.message, open: true, type: 'success' }))
+
+                setTimeout(() => {
+                    setSnackbarState((prev) => ({ open: false }))
+                }, 2500);
+            }
+        }
+        catch (error) {
+            setSnackbarState((prev) => ({ message: error.response.data.message, open: true, type: 'error' }))
+            setTimeout(() => {
+                setSnackbarState((prev) => ({ ...prev, open: false }))
+            }, 2500);
+        }
+        setIsLoading(false);
     }
 
 
-    const handleValidateForgetOtp = async () => {
-        setState({
-            sendOtp: false,
-            phone: false,
-            registerOtp: false,
-            forgotPassword: false
-        })
+    const handleValidateForgetOtp = async (values) => {
 
-        setNewPassword(true)
+
+        setIsLoading(true);
+        try {
+            let body = {
+                email: values.forgottedEmail,
+                otp: values.otp
+            }
+
+            let response = await axiosHttp.post('/verify-otp?new=false', body);
+
+            if (response.status >= 200 && response.status <= 399) {
+
+                setSnackbarState((prev) => ({ message: response.data.message, open: true, type: 'success' }))
+                setTimeout(() => {
+                    setSnackbarState((prev) => ({ open: false }))
+                }, 2500);
+                setState({
+                    sendOtp: false,
+                    phone: false,
+                    registerOtp: false,
+                    forgotPassword: false
+                })
+
+                setNewPassword(true)
+            }
+        }
+        catch (error) {
+            setSnackbarState((prev) => ({ message: error?.response?.data?.message, open: true, type: 'error' }))
+            setTimeout(() => {
+                setSnackbarState((prev) => ({ ...prev, open: false }))
+            }, 2500);
+        }
+        setIsLoading(false);
+
     }
 
 
@@ -270,7 +453,15 @@ function SignUp() {
                                         fontSize: '18px',
                                         fontFamily: 'Futura Medium',
                                     }}
-                                    onClick={() => { formik.setFieldValue('signup', false) }}
+                                    onClick={() => {
+                                        formik.setFieldValue('signup', false)
+                                        setState({
+                                            sendOtp: false,
+                                            phone: false,
+                                            registerOtp: false,
+                                            forgotPassword: false
+                                        })
+                                    }}
                                 >Log In</Typography>
                             </Stack>
                             :
@@ -286,7 +477,15 @@ function SignUp() {
                                         fontSize: '18px',
                                         fontFamily: 'Futura Medium',
                                     }}
-                                    onClick={() => { formik.setFieldValue('signup', true) }}
+                                    onClick={() => {
+                                        formik.setFieldValue('signup', true);
+                                        setState({
+                                            sendOtp: false,
+                                            phone: false,
+                                            registerOtp: false,
+                                            forgotPassword: false
+                                        })
+                                    }}
                                 >Sign Up</Typography>
                             </Stack>
                         }
@@ -450,6 +649,24 @@ function SignUp() {
                                                 />
                                             )}
                                         />
+                                        <Typography
+                                            variant='caption'
+                                            sx={{
+                                                fontSize: '16px',
+                                                // textDecoration: 'underline',
+                                                cursor: otpTime === 0 && 'pointer',
+                                                fontFamily: 'Futura light',
+                                                textAlign: 'right',
+                                                color: otpTime !== 0 ? '#b3b3b3' : 'white'
+                                            }}
+                                            onClick={() => {
+                                                if (otpTime === 0) {
+                                                    sendForRegisterOtp(formik.values)
+                                                }
+                                            }}
+                                        >
+                                            {otpTime===0?"Resend OTP": `Resend OTP in ${otpTime} seconds`}
+                                        </Typography>
                                     </Stack>
                                 }
                             </ThemeProvider>
@@ -457,15 +674,15 @@ function SignUp() {
                     </Stack>
 
 
-                    <Stack mt={6} gap={1} width={'320px'}>
+                    <Stack mt={state.registerOtp ? 4 : 7} gap={1} width={'320px'}>
 
-                        {!formik.values.signup && <Typography 
-                        sx={{
-                            fontSize: '16px',
-                            textDecoration: 'underline',
-                            cursor: 'pointer',
-                            fontFamily: 'Futura light',
-                        }}
+                        {!formik.values.signup && <Typography
+                            sx={{
+                                fontSize: '16px',
+                                textDecoration: 'underline',
+                                cursor: 'pointer',
+                                fontFamily: 'Futura light',
+                            }}
                             onClick={() => { setState((prev) => ({ ...prev, forgotPassword: true })) }}
                         >Forgot password?
                         </Typography>
@@ -577,12 +794,31 @@ function SignUp() {
                                                 />
                                             )}
                                         />
+                                        <Typography
+                                            variant='caption'
+                                            sx={{
+                                                fontSize: '16px',
+                                                // textDecoration: 'underline',
+                                                cursor: otpTime === 0 && 'pointer',
+                                                fontFamily: 'Futura light',
+                                                textAlign: 'right',
+                                                color: otpTime !== 0 ? '#b3b3b3' : 'white'
+                                            }}
+                                            onClick={() => {
+                                                if (otpTime === 0) {
+                                                    handleSendForgetOtp(formikForgot.values)
+                                                }
+                                            }}
+                                        >
+                                           {otpTime===0?"Resend OTP": `Resend OTP in ${otpTime} seconds`}
+                                        </Typography>
                                     </Stack>
                                 }
                             </ThemeProvider>
                         </FormikProvider>
                     </Stack>
-                    <Stack mt={6} gap={1} width={'320px'}>
+
+                    <Stack mt={state.sendOtp ? 4 : 7} gap={1} width={'320px'}>
                         <Button
                             variant='contained'
                             sx={{
@@ -713,7 +949,7 @@ function SignUp() {
                     horizontal: 'center',
                 }}
             >
-                <Alert severity="success" sx={{ width: '100%' }}>
+                <Alert severity={snackbarState.type} sx={{ width: '100%' }}>
                     {snackbarState.message}
                 </Alert>
             </Snackbar>
