@@ -401,7 +401,7 @@ function SignUp() {
             setSnackbarState((prev) => ({ message: error?.response?.data?.message, open: true, type: 'error' }))
             setTimeout(() => {
                 setSnackbarState((prev) => ({ ...prev, open: false }))
-            }, 2500);
+            }, 2500); 
         }
         setIsLoading(false);
 
