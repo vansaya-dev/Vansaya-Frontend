@@ -195,7 +195,7 @@ function SignUp() {
 
             if (response.status == 200) {
 
-                setSnackbarState((prev) => ({ message: response.data.message, open: true, type: 'success' }))
+                setSnackbarState((prev) => ({ message: response?.data?.message, open: true, type: 'success' }))
                 setTimeout(() => {
                     setSnackbarState((prev) => ({ open: false }))
                 }, 2500);
@@ -205,7 +205,7 @@ function SignUp() {
         }
         catch (error) {
 
-            setSnackbarState((prev) => ({ message: error.response.data.message, open: true, type: 'error' }))
+            setSnackbarState((prev) => ({ message: error?.response?.data?.message, open: true, type: 'error' }))
             setTimeout(() => {
                 setSnackbarState((prev) => ({ ...prev, open: false }))
             }, 2500);
@@ -226,7 +226,7 @@ function SignUp() {
             let response = await axiosHttp.post('/register', body);
 
             if (response.status >= 200 && response.status <= 399) {
-                setSnackbarState((prev) => ({ message: response.data.message, open: true, type: 'success' }))
+                setSnackbarState((prev) => ({ message: response?.data?.message, open: true, type: 'success' }))
                 setTimeout(() => {
                     setSnackbarState((prev) => ({ open: false }))
                     router.back();
@@ -236,7 +236,7 @@ function SignUp() {
         }
         catch (error) {
 
-            setSnackbarState((prev) => ({ message: error.response.data.message, open: true, type: 'error' }))
+            setSnackbarState((prev) => ({ message: error?.response?.data?.message, open: true, type: 'error' }))
             setTimeout(() => {
                 setSnackbarState((prev) => ({ ...prev, open: false }))
             }, 3500);
@@ -269,14 +269,14 @@ function SignUp() {
                 }, 10000);
 
 
-                setSnackbarState((prev) => ({ message: response.data.message, open: true, type: 'success' }))
+                setSnackbarState((prev) => ({ message: response?.data?.message, open: true, type: 'success' }))
                 setTimeout(() => {
                     setSnackbarState((prev) => ({ open: false }))
                 }, 2500);
             }
         }
         catch (error) {
-            setSnackbarState((prev) => ({ message: error.response.data.message, open: true, type: 'error' }))
+            setSnackbarState((prev) => ({ message: error?.response?.data?.message, open: true, type: 'error' }))
             setTimeout(() => {
                 setSnackbarState((prev) => ({ ...prev, open: false }))
             }, 2500);
@@ -297,7 +297,7 @@ function SignUp() {
 
             let response = await axiosHttp.post('/login', body);
             if (response.data.statusCode === 200) {
-                setSnackbarState((prev) => ({ message: response.data.message, open: true, type: 'success' }))
+                setSnackbarState((prev) => ({ message: response?.data?.message, open: true, type: 'success' }))
                 setTimeout(() => {
                     setSnackbarState((prev) => ({ open: false }))
                     router.back();
@@ -310,7 +310,7 @@ function SignUp() {
         }
         catch (error) {
 
-            setSnackbarState((prev) => ({ message: error.response.data.message, open: true, type: 'error' }))
+            setSnackbarState((prev) => ({ message: error?.response?.data?.message, open: true, type: 'error' }))
             setTimeout(() => {
                 setSnackbarState((prev) => ({ ...prev, open: false }))
             }, 2500);
@@ -352,7 +352,7 @@ function SignUp() {
                     clearInterval(intervalId);
                 }, 10000);
 
-                setSnackbarState((prev) => ({ message: response.data.message, open: true, type: 'success' }))
+                setSnackbarState((prev) => ({ message: response?.data?.message, open: true, type: 'success' }))
 
                 setTimeout(() => {
                     setSnackbarState((prev) => ({ open: false }))
@@ -360,7 +360,7 @@ function SignUp() {
             }
         }
         catch (error) {
-            setSnackbarState((prev) => ({ message: error.response.data.message, open: true, type: 'error' }))
+            setSnackbarState((prev) => ({ message: error?.response?.data?.message, open: true, type: 'error' }))
             setTimeout(() => {
                 setSnackbarState((prev) => ({ ...prev, open: false }))
             }, 2500);
@@ -383,7 +383,7 @@ function SignUp() {
 
             if (response.status >= 200 && response.status <= 399) {
 
-                setSnackbarState((prev) => ({ message: response.data.message, open: true, type: 'success' }))
+                setSnackbarState((prev) => ({ message: response?.data?.message, open: true, type: 'success' }))
                 setTimeout(() => {
                     setSnackbarState((prev) => ({ open: false }))
                 }, 2500);
