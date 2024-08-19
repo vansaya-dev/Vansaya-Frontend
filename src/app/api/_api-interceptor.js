@@ -8,7 +8,7 @@ import Cookies from 'js-cookie';
 
 
 const axiosHttp = axios.create({
-  baseURL: `${config.baseURL}api/v1`,
+  baseURL: `${config.baseURL}/api/v1`,
 });
 
 axiosHttp.interceptors.request.use(
