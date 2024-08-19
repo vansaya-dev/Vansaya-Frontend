@@ -42,6 +42,15 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+::selection {
+  background-color: #e01fff;
+  color: white; 
+}
+
+::-moz-selection {
+  background-color: #e01fff;
+  color: white; 
+}
 
 @layer utilities {
   .text-balance {
