@@ -74,6 +74,7 @@ const theme = createTheme({
 function SignUp() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [otpTime, setOtpTime] = useState(0);
     const [newPassword, setNewPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -154,7 +155,12 @@ function SignUp() {
     });
     const newPasswordSchema = Yup.object().shape({
         newPassword: Yup.string()
-            .required('Password is required'),
+            .required('Password is required')
+            .min(6, 'Password must be at least 6 characters')
+            .matches(
+                /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/,
+                'Password must contain at least one special character, one letter, and one number'
+            ),
         confirmPassword: Yup.string()
             .oneOf([Yup.ref('newPassword'), null], 'Passwords must match')
             .required('Confirm password is required')
@@ -170,17 +176,40 @@ function SignUp() {
             handleResetPassword(values);
         },
     });
-    const handleResetPassword = async () => {
-        setSnackbarState((prev) => ({ message: 'New Password Created Successfully!', open: true, type: 'success' }))
-        setTimeout(() => {
-            setSnackbarState((prev) => ({ open: false }))
-        }, 2500);
-        setNewPassword(false);
-        formik.resetForm();
-        formikForgot.resetForm();
-        formikNewPassword.resetForm();
-        formik.setFieldValue('signup', false)
+    const handleResetPassword = async (values) => {
+
+        setIsLoading(true);
+        try {
+            let body = {
+                email: formikForgot.values.forgottedEmail,
+                newPassword: values.newPassword
+            }
+
+            let response = await axiosHttp.patch('/forgot-password', body);
+
+            if (response.status >= 200 && response.status <= 399) {
+
+                setSnackbarState((prev) => ({ message: response?.data?.message, open: true, type: 'success' }))
+                setTimeout(() => {
+                    setSnackbarState((prev) => ({ open: false }))
+                }, 2500);
+                setNewPassword(false);
+                formik.resetForm();
+                formikForgot.resetForm();
+                formikNewPassword.resetForm();
+                formik.setFieldValue('signup', false)
+            }
+        }
+        catch (error) {
+
+            setSnackbarState((prev) => ({ message: error?.response?.data?.message, open: true, type: 'error' }))
+            setTimeout(() => {
+                setSnackbarState((prev) => ({ ...prev, open: false }))
+            }, 2500);
+        }
+        setIsLoading(false);
     }
+
 
     const verifyRegisterOtp = async (values) => {
 
@@ -322,6 +351,9 @@ function SignUp() {
     const handleClickShowPassword = () => {
         setShowPassword(!showPassword);
     };
+    const handleClickShowConfirmPassword = () => {
+        setShowConfirmPassword(!showConfirmPassword);
+    };
 
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
@@ -401,7 +433,7 @@ function SignUp() {
             setSnackbarState((prev) => ({ message: error?.response?.data?.message, open: true, type: 'error' }))
             setTimeout(() => {
                 setSnackbarState((prev) => ({ ...prev, open: false }))
-            }, 2500); 
+            }, 2500);
         }
         setIsLoading(false);
 
@@ -411,7 +443,7 @@ function SignUp() {
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-between p-24 bg-black text-white">
-
+           
             {!state.forgotPassword && !newPassword ?
                 <Stack m={2}>
 
@@ -441,7 +473,7 @@ function SignUp() {
                             </Typography>
                         }
                         {formik.values.signup ?
-                            <Stack direction={'row'}>
+                            <Stack direction={'row'} gap={0.7}>
                                 <Typography sx={{
                                     fontSize: '18px',
                                     fontFamily: 'Futura Medium',
@@ -465,7 +497,7 @@ function SignUp() {
                                 >Log In</Typography>
                             </Stack>
                             :
-                            <Stack direction={'row'}>
+                            <Stack direction={'row'} gap={0.7}>
                                 <Typography sx={{
                                     fontSize: '18px',
                                     fontFamily: 'Futura Medium',
@@ -628,10 +660,10 @@ function SignUp() {
                                     <Stack mt={2} gap={1}>
                                         <Typography
                                             variant='caption'
-                                            sx={{ 
+                                            sx={{
                                                 color: '#b3b3b3',
                                                 fontFamily: 'Futura light',
-                                             }}
+                                            }}
                                         >
                                             Enter OTP(sent on email):
                                         </Typography>
@@ -668,7 +700,7 @@ function SignUp() {
                                                 }
                                             }}
                                         >
-                                            {otpTime===0?"Resend OTP": `Resend OTP in ${otpTime} seconds`}
+                                            {otpTime === 0 ? "Resend OTP" : `Resend OTP in ${otpTime} seconds`}
                                         </Typography>
                                     </Stack>
                                 }
@@ -776,10 +808,10 @@ function SignUp() {
                                     <Stack mt={2} gap={1}>
                                         <Typography
                                             variant='caption'
-                                            sx={{ 
+                                            sx={{
                                                 color: '#b3b3b3',
                                                 fontFamily: 'Futura light',
-                                             }}
+                                            }}
                                         >
                                             Enter OTP(sent on email):
                                         </Typography>
@@ -816,7 +848,7 @@ function SignUp() {
                                                 }
                                             }}
                                         >
-                                           {otpTime===0?"Resend OTP": `Resend OTP in ${otpTime} seconds`}
+                                            {otpTime === 0 ? "Resend OTP" : `Resend OTP in ${otpTime} seconds`}
                                         </Typography>
                                     </Stack>
                                 }
@@ -880,7 +912,7 @@ function SignUp() {
                                         <TextField
                                             {...field}
                                             required
-                                            // disabled={state.registerOtp}
+                                            type={showPassword ? 'text' : 'password'}
                                             id="standard-basic"
                                             label="New Password"
                                             variant="standard"
@@ -891,6 +923,22 @@ function SignUp() {
                                                 '& .MuiInputLabel-root:after': {
                                                     color: 'white',
                                                 },
+                                            }}
+                                            InputProps={{
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <IconButton
+                                                            sx={{
+                                                                mr: 0
+                                                            }}
+                                                            onClick={handleClickShowPassword}
+                                                            onMouseDown={handleMouseDownPassword}
+                                                            edge="end"
+                                                        >
+                                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                                ),
                                             }}
                                             error={Boolean(formikNewPassword.errors.newPassword && formikNewPassword.touched.newPassword)}
                                             helperText={formikNewPassword.touched.newPassword && formikNewPassword.errors.newPassword}
@@ -912,6 +960,23 @@ function SignUp() {
                                                 '& .MuiInputLabel-root:after': {
                                                     color: 'white',
                                                 },
+                                            }}
+                                            type={showConfirmPassword ? 'text' : 'password'}
+                                            InputProps={{
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <IconButton
+                                                            sx={{
+                                                                mr: 0
+                                                            }}
+                                                            onClick={handleClickShowConfirmPassword}
+                                                            onMouseDown={handleMouseDownPassword}
+                                                            edge="end"
+                                                        >
+                                                            {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                                ),
                                             }}
                                             error={Boolean(formikNewPassword.errors.confirmPassword && formikNewPassword.touched.confirmPassword)}
                                             helperText={formikNewPassword.touched.confirmPassword && formikNewPassword.errors.confirmPassword}
