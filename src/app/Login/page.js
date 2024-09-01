@@ -25,51 +25,51 @@ const darkModeStyles = {
     width: '100%',             // Ensure full width
 };
 
-const focusStyles = {
-    borderColor: '#777',       // Lighter border on focus
-    outline: 'none',
-};
-/* ...............................................................*/
+// const focusStyles = {
+//     borderColor: '#777',       // Lighter border on focus
+//     outline: 'none',
+// };
+// /* ...............................................................*/
 
 
-/* .................theme defined for mui input and buttons..................*/
-const theme = createTheme({
-    palette: {
-        mode: 'dark', // This sets the dark mode
-        primary: {
-            main: '#90caf9', // Example primary color
-        },
-        secondary: {
-            main: '#f48fb1', // Example secondary color
-        },
-    },
-    components: {
-        MuiTextField: {
-            styleOverrides: {
-                root: {
-                    // Custom styles for TextField
-                    '& .MuiInputBase-root': {
-                        color: 'white', // Text color
-                    },
-                    '& .MuiInputLabel-root': {
-                        color: 'rgba(255, 255, 255, 0.7)', // Label color
-                    },
-                    '& .MuiOutlinedInput-root': {
-                        '& fieldset': {
-                            borderColor: '#e01fff', // Border color
-                        },
-                        '&:hover fieldset': {
-                            borderColor: '#e01fff', // Border color on hover
-                        },
-                        '&.Mui-focused fieldset': {
-                            borderColor: '#e01fff', // Border color when focused
-                        },
-                    },
-                },
-            },
-        },
-    },
-});
+// /* .................theme defined for mui input and buttons..................*/
+// const theme = createTheme({
+//     palette: {
+//         mode: 'dark', // This sets the dark mode
+//         primary: {
+//             main: '#90caf9', // Example primary color
+//         },
+//         secondary: {
+//             main: '#f48fb1', // Example secondary color
+//         },
+//     },
+//     components: {
+//         MuiTextField: {
+//             styleOverrides: {
+//                 root: {
+//                     // Custom styles for TextField
+//                     '& .MuiInputBase-root': {
+//                         color: 'white', // Text color
+//                     },
+//                     '& .MuiInputLabel-root': {
+//                         color: 'rgba(255, 255, 255, 0.7)', // Label color
+//                     },
+//                     '& .MuiOutlinedInput-root': {
+//                         '& fieldset': {
+//                             borderColor: '#e01fff', // Border color
+//                         },
+//                         '&:hover fieldset': {
+//                             borderColor: '#e01fff', // Border color on hover
+//                         },
+//                         '&.Mui-focused fieldset': {
+//                             borderColor: '#e01fff', // Border color when focused
+//                         },
+//                     },
+//                 },
+//             },
+//         },
+//     },
+// });
 /* ...........................................................*/
 function SignUp() {
     const router = useRouter();
@@ -532,7 +532,7 @@ function SignUp() {
 
                         <Stack mt={4} gap={1} width={'320px'}>
                             <FormikProvider value={formik}>
-                                <ThemeProvider theme={theme}>
+                                {/* <ThemeProvider theme={theme}> */}
                                     {state.phone ?
                                         <Field name="phone">
                                             {({ field }) => (
@@ -711,7 +711,7 @@ function SignUp() {
                                             </Typography>
                                         </Stack>
                                     }
-                                </ThemeProvider>
+                                {/* </ThemeProvider> */}
                             </FormikProvider>
                         </Stack>
 
@@ -788,7 +788,7 @@ function SignUp() {
                         </Stack>
                         <Stack mt={5} width={'320px'} gap={3}>
                             <FormikProvider value={formikForgot}>
-                                <ThemeProvider theme={theme}>
+                                {/* <ThemeProvider theme={theme}> */}
                                     <Field name="forgottedEmail">
                                         {({ field }) => (
                                             <TextField
@@ -859,7 +859,7 @@ function SignUp() {
                                             </Typography>
                                         </Stack>
                                     }
-                                </ThemeProvider>
+                                {/* </ThemeProvider> */}
                             </FormikProvider>
                         </Stack>
 
@@ -912,7 +912,7 @@ function SignUp() {
                         <Stack mt={4} gap={2} width={'320px'}>
 
                             <FormikProvider value={formikNewPassword}>
-                                <ThemeProvider theme={theme}>
+                                {/* <ThemeProvider theme={theme}> */}
 
                                     <Field name="newPassword">
                                         {({ field }) => (
@@ -991,7 +991,7 @@ function SignUp() {
                                         )}
                                     </Field>
 
-                                </ThemeProvider>
+                                {/* </ThemeProvider> */}
                             </FormikProvider>
 
 
