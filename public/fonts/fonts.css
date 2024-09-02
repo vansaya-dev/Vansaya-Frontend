@@ -1,0 +1,14 @@
+@font-face {
+    font-family: 'Futura Light';
+    src: url('/fonts/futura/futura-light.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Futura Medium';
+    src: url('/fonts/futura/futura-medium.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
