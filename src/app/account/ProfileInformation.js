@@ -48,7 +48,7 @@ function ProfileInformation({ userDetails, getUserDetails }) {
         let data = {
             firstName: userDetails?.firstName ? userDetails?.firstName : "",
             lastName: userDetails?.lastName ? userDetails?.lastName : "",
-            email: userDetails.email,
+            email: userDetails?.email ? userDetails?.email : "",
             mobileNumber: userDetails?.mobileNumber ? userDetails?.mobileNumber : "",
         };
         formik.setValues(data);
@@ -58,11 +58,10 @@ function ProfileInformation({ userDetails, getUserDetails }) {
     const userData = {
         firstName: userDetails?.firstName ? userDetails?.firstName : "",
         lastName: userDetails?.lastName ? userDetails?.lastName : "",
-        email: userDetails.email,
+        email: userDetails?.email ? userDetails?.email : "",
         mobileNumber: userDetails?.mobileNumber ? userDetails?.mobileNumber : "",
     };
-    console.log(userDetails.firstName, 'nigga details');
-    console.log(userData, 'nigga data');
+    
     const formik = useFormik({
         initialValues: userData,
         validationSchema: Yup.object({
@@ -197,7 +196,7 @@ function ProfileInformation({ userDetails, getUserDetails }) {
         try {
             let payload = { ...values, mobileNumber: '+91' + values.mobileNumber }
             let response = await axiosHttp.patch('/users/profile', values)
-            console.log(response, 'nigga response')
+            
             setSnackbarState((prev) => ({ message: response?.data?.message, open: true, type: 'success' }))
             setTimeout(() => {
                 setSnackbarState((prev) => ({ ...prev, open: false }))

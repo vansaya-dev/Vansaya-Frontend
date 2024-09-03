@@ -21,18 +21,17 @@ import axiosHttp from "../api/_api-interceptor";
 function Page() {
     const [selectedComponent, setSelectedComponent] = useState("Profile Information");
     const [flagForData, setFlagForData] = useState(false);
-    // const [userDetails, setUserDetails] = useState({});
+    const [userDetails, setUserDetails] = useState({});
     const accountOptions = ["Profile Information", "Manage Addresses", "PAN Card Information"];
     const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
 
-    let userDetails = {}
-    const data = localStorage.getItem('loggedInUserDetails');
-    userDetails = JSON.parse(data);
     useEffect(() => {
+        
         const data = localStorage.getItem('loggedInUserDetails');
-        userDetails = JSON.parse(data); 
-        // setUserDetails(userDetails)
-    }, [flagForData])
+        if (data) {
+            setUserDetails(JSON.parse(data));
+        }
+    }, [flagForData]);
     // Function to render the selected component
     const renderComponent = () => {
         switch (selectedComponent) {
