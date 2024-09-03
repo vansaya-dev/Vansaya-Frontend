@@ -26,7 +26,7 @@ function Page() {
     const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
 
     useEffect(() => {
-        
+
         const data = localStorage.getItem('loggedInUserDetails');
         if (data) {
             setUserDetails(JSON.parse(data));
@@ -45,6 +45,8 @@ function Page() {
                 return <ProfileInformation />;
         }
     };
+
+    useEffect(() => { getUserDetails() }, [])
 
     const getUserDetails = async () => {
         try {
