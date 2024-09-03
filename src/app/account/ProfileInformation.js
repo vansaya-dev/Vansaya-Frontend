@@ -1,12 +1,15 @@
+/* eslint-disable react/prop-types */
 "use client";
-import React, { useState } from "react";
-import { Button, Grid, Stack, TextField, Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Alert, Button, Grid, InputAdornment, Snackbar, Stack, TextField, Typography } from "@mui/material";
 import OTPInput from "react-otp-input";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Fahkwang } from "next/font/google";
+// import { Fahkwang } from "next/font/google";
+import { CheckCircle } from "@mui/icons-material";
+import axiosHttp from "../api/_api-interceptor";
 
-const fahkwang = Fahkwang({ subsets: ["latin"], weight: ["400"] });
+// const fahkwang = Fahkwang({ subsets: ["latin"], weight: ["400"] });
 const darkModeStyles = {
     backgroundColor: '#333',
     color: '#fff',
@@ -20,20 +23,46 @@ const focusStyles = {
     border: '2px solid #e01fff',
 };
 
-const userData = {
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    mobileNumber: "1234567890",
-};
 
-function ProfileInformation() {
+
+function ProfileInformation({ userDetails, getUserDetails }) {
     const [isEditable, setIsEditable] = useState(false);
     const [showOTPInput, setShowOTPInput] = useState(false);
     const [otpCurrent, setOtpCurrent] = useState(""); // State for current email OTP
     const [otpNew, setOtpNew] = useState(""); // State for new email OTP
-    const [otpTime, setOtpTime] = useState(9);
+    const [otpTime, setOtpTime] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
+    const [otpVerified, setOtpVerified] = useState({
+        old: false,
+        new: false,
+        both: false
+    });
+    const [snackbarState, setSnackbarState] = useState({
+        open: false,
+        message: '',
+        type: 'success'
+    });
 
+
+    useEffect(() => {
+        let data = {
+            firstName: userDetails?.firstName ? userDetails?.firstName : "",
+            lastName: userDetails?.lastName ? userDetails?.lastName : "",
+            email: userDetails.email,
+            mobileNumber: userDetails?.mobileNumber ? userDetails?.mobileNumber : "",
+        };
+        formik.setValues(data);
+
+    }, [userDetails])
+
+    const userData = {
+        firstName: userDetails?.firstName ? userDetails?.firstName : "",
+        lastName: userDetails?.lastName ? userDetails?.lastName : "",
+        email: userDetails.email,
+        mobileNumber: userDetails?.mobileNumber ? userDetails?.mobileNumber : "",
+    };
+    console.log(userDetails.firstName, 'nigga details');
+    console.log(userData, 'nigga data');
     const formik = useFormik({
         initialValues: userData,
         validationSchema: Yup.object({
@@ -51,29 +80,178 @@ function ProfileInformation() {
                 .required("Mobile Number is required"),
         }),
         onSubmit: (values) => {
-            setShowOTPInput(formik.values.email !== userData.email);
+
+            let changedData = getChangedValues(userData, values)
+
+            if (otpVerified.both) {
+                saveChanges(changedData)
+            }
+            else if (formik.values.email !== userData.email) {
+
+                setShowOTPInput(true);
+                sendOtp(formik.values.email, true)
+                sendOtp(userData.email, false)
+            }
+            else {
+                saveChanges(changedData)
+            }
             console.log("Form data:", values);
             // setIsEditable(false);
         },
     });
 
+
+    const sendOtp = async (email, isNew) => {
+
+        setIsLoading(true);
+        try {
+            let body = {
+                email: email,
+            }
+
+            let response = await axiosHttp.post(`send-otp?new=${isNew}`, body);
+
+            if (response.status == 200) {
+                if (isNew) {
+                    setOtpTime(30);
+                    const intervalId = setInterval(() => {
+                        setOtpTime((prev) => (prev - 1));
+                    }, 1000);
+
+                    setTimeout(() => {
+                        clearInterval(intervalId);
+                    }, 30000);
+                }
+
+
+
+                setSnackbarState((prev) => ({ message: response?.data?.message, open: true, type: 'success' }))
+                setTimeout(() => {
+                    setSnackbarState((prev) => ({ open: false }))
+                }, 2500);
+            }
+        }
+        catch (error) {
+            setSnackbarState((prev) => ({ message: error?.response?.data?.message, open: true, type: 'error' }))
+            setTimeout(() => {
+                setSnackbarState((prev) => ({ ...prev, open: false }))
+            }, 2500);
+        }
+        setIsLoading(false);
+
+    };
+
+    const verifyOtp = async (email, otp, isNew) => {
+
+        setIsLoading(true);
+        try {
+            let body = {
+                email: email,
+                otp: otp
+            }
+
+            let response = await axiosHttp.post(`/verify-otp?new=${isNew}`, body);
+
+            if (response.status == 200) {
+                if (isNew) {
+                    setOtpVerified((prev) => ({ ...prev, new: true }))
+                }
+                else {
+                    setOtpVerified((prev) => ({ ...prev, old: true }))
+                }
+
+
+            }
+        }
+        catch (error) {
+
+            setSnackbarState((prev) => ({ message: error?.response?.data?.message, open: true, type: 'error' }))
+            setTimeout(() => {
+                setSnackbarState((prev) => ({ ...prev, open: false }))
+            }, 2500);
+        }
+        setIsLoading(false);
+    };
+
+    const getChangedValues = (initialValues, currentValues) => {
+
+        const changedValues = {};
+
+
+        for (const key in initialValues) {
+            if (Object.prototype.hasOwnProperty.call(initialValues, key)) {
+                // Checking if the value has changed
+                if (initialValues[key] !== currentValues[key]) {
+                    changedValues[key] = currentValues[key];
+                }
+            }
+        }
+
+        return changedValues;
+    };
+
+
+
+    const saveChanges = async (values) => {
+        setIsLoading(true);
+        try {
+            let payload = { ...values, mobileNumber: '+91' + values.mobileNumber }
+            let response = await axiosHttp.patch('/users/profile', values)
+            console.log(response, 'nigga response')
+            setSnackbarState((prev) => ({ message: response?.data?.message, open: true, type: 'success' }))
+            setTimeout(() => {
+                setSnackbarState((prev) => ({ ...prev, open: false }))
+            }, 2500);
+            getUserDetails()
+            toggleEditMode();
+        }
+        catch (error) {
+            setSnackbarState((prev) => ({ message: error?.response?.data?.message, open: true, type: 'error' }))
+            setTimeout(() => {
+                setSnackbarState((prev) => ({ ...prev, open: false }))
+            }, 3000);
+        }
+        setIsLoading(false);
+
+    }
+
+
+
     const toggleEditMode = () => {
         setIsEditable(!isEditable);
         setShowOTPInput(false);
+        setOtpVerified({
+            old: false,
+            new: false,
+            both: false
+        })
+        formik.setValues(userData)
     };
 
     const handleEmailChange = (e) => {
         formik.handleChange(e);
     };
 
-    const handleVerifyBothOtp = () => {
-        // Handle OTP verification here
-        console.log("Current Email OTP:", otpCurrent);
-        console.log("New Email OTP:", otpNew);
-        setOtpCurrent('')
-        setOtpNew('')
-        setShowOTPInput(false);
+    const handleVerifyBothOtp = async () => {
+        // Handling OTP verification here
+        await verifyOtp(userData.email, otpCurrent, false);
+        await verifyOtp(formik.values.email, otpNew, true);
+
     };
+
+    useEffect(() => {
+        if (otpVerified.new && otpVerified.old && !otpVerified.both) {
+            setOtpVerified((prev) => ({ ...prev, both: true }))
+            setSnackbarState((prev) => ({ message: "Both Email Verified Successfully, click on save to update the changes", open: true, type: 'success' }))
+            setTimeout(() => {
+                setSnackbarState((prev) => ({ open: false }))
+            }, 5500);
+            setOtpCurrent('')
+            setOtpNew('')
+            setShowOTPInput(false);
+        }
+    }, [otpVerified.new, otpVerified.old])
+
 
     return (
         <Grid
@@ -156,7 +334,7 @@ function ProfileInformation() {
                                 label="Email"
                                 type="email"
                                 variant="standard"
-                                disabled={!isEditable}
+                                disabled={!isEditable || showOTPInput}
                                 value={formik.values.email}
                                 onChange={handleEmailChange}
                                 onBlur={formik.handleBlur}
@@ -171,12 +349,19 @@ function ProfileInformation() {
                                     },
                                     width: { md: "270px", sm: "210px", xs: "195px" },
                                 }}
+                                InputProps={{
+                                    endAdornment: otpVerified.both && (
+                                        <InputAdornment position="end">
+                                            <CheckCircle />
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
                             {showOTPInput && (
                                 <Stack gap={3} sx={{ width: { md: "270px", sm: "210px", xs: "195px" } }}>
                                     <Stack gap={1}>
-                                        <Typography variant="subtitle1" sx={{ fontFamily: "Futura Medium" }}>
-                                            Current Email OTP
+                                        <Typography variant="caption" color={'#b3b3b3'} sx={{ fontFamily: "Futura Medium" }}>
+                                            OTP sent on {userData.email}
                                         </Typography>
                                         <OTPInput
                                             value={otpCurrent}
@@ -196,8 +381,8 @@ function ProfileInformation() {
                                         />
                                     </Stack>
                                     <Stack gap={1}>
-                                        <Typography variant="subtitle1" sx={{ fontFamily: "Futura Medium" }}>
-                                            New Email OTP
+                                        <Typography variant="caption" color={'#b3b3b3'} sx={{ fontFamily: "Futura Medium" }}>
+                                            OTP sent on {formik.values.email}
                                         </Typography>
                                         <OTPInput
                                             value={otpNew}
@@ -216,7 +401,7 @@ function ProfileInformation() {
                                             )}
                                         />
                                     </Stack>
-                                    <Stack direction={'row'}  justifyContent={'space-between'}>
+                                    <Stack direction={'row'} justifyContent={'space-between'}>
                                         <Button
                                             variant="contained"
                                             sx={{
@@ -229,6 +414,7 @@ function ProfileInformation() {
                                                 // height: "48px",
                                             }}
                                             onClick={handleVerifyBothOtp}
+                                            disabled={!otpCurrent || !otpNew}
                                         >
                                             Verify
                                         </Button>
@@ -241,11 +427,14 @@ function ProfileInformation() {
                                                 fontFamily: 'Futura light',
                                                 textAlign: 'right',
                                                 color: otpTime !== 0 ? '#b3b3b3' : 'white',
-                                                
+
                                             }}
                                             onClick={() => {
                                                 if (otpTime === 0) {
-                                                    // sendForRegisterOtp(formik.values)
+                                                    sendOtp(formik.values.email, true)
+                                                    sendOtp(userData.email, false)
+                                                    setOtpCurrent('')
+                                                    setOtpNew('')
                                                 }
                                             }}
                                         >
@@ -315,11 +504,12 @@ function ProfileInformation() {
                                         height: "48px",
                                     }}
                                     disabled={
-                                        formik.values.firstName === userData.firstName &&
-                                        formik.values.lastName === userData.lastName &&
-                                        formik.values.email === userData.email &&
-                                        formik.values.mobileNumber === userData.mobileNumber
-                                    } // Disable save button if no changes
+                                        (formik.values.firstName === userData.firstName &&
+                                            formik.values.lastName === userData.lastName &&
+                                            formik.values.email === userData.email &&
+                                            formik.values.mobileNumber == userData.mobileNumber) ||
+                                        showOTPInput
+                                    }
                                 >
                                     Save
                                 </Button>
@@ -328,6 +518,18 @@ function ProfileInformation() {
                     </Stack>
                 </form>
             </Stack>
+            <Snackbar
+                open={snackbarState.open}
+                autoHideDuration={4000}
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'center',
+                }}
+            >
+                <Alert severity={snackbarState.type} sx={{ width: '100%' }}>
+                    {snackbarState.message}
+                </Alert>
+            </Snackbar>
         </Grid>
     );
 }

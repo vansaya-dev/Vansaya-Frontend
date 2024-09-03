@@ -16,18 +16,12 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import { Stack } from '@mui/material';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'; // Import Cart icon
-import LoginIcon from '@mui/icons-material/Login'; // Import Login icon
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'; 
+import LoginIcon from '@mui/icons-material/Login'; 
 import { useRouter } from "next/navigation";
+import { pages } from '../../routes'; 
 const fahkwang = Fahkwang({ subsets: ['latin'], weight: ['400'] });
 
-const pages = [
-  { name: 'Home', route: '/' },
-  { name: 'Products', route: '/products' },
-  { name: 'Experience', route: '/experience' },
-  { name: 'About', route: '/about' },
-  { name: 'Contact', route: '/contact' }
-];
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -74,23 +68,27 @@ const Navbar = () => {
                   href="/"
                   sx={{
                     fontFamily: fahkwang.style.fontFamily,
-                    fontWeight: 700,
-                    letterSpacing: '.3rem',
+                    // fontWeight: 700,
+                    letterSpacing: '.6rem',
                     color: 'white',
                     textDecoration: 'none',
                   }}
                 >
-                  Vansaya
+                  VANSAYA
                 </Typography>
               </Box>
 
               {/* Menu Items */}
               <Stack direction="row" spacing={6} justifyContent="center">
-                {pages.map((page) => (
+                {pages.map((page) => page.isMenu && (
                   <Button
                     key={page.name}
                     onClick={() => { router.push(page.route); }}
-                    sx={{ color: 'white' }}
+                    sx={{
+                      color: 'white',
+                      fontFamily: "Futura Medium",
+
+                    }}
                   >
                     {page.name}
                   </Button>
@@ -139,13 +137,13 @@ const Navbar = () => {
           >
             <Box sx={{ width: 250 }} role="presentation" onClick={handleDrawerToggle}>
               <List>
-                {pages.map((page) => (
+                {pages.map((page) => page.isMenu && (
                   <ListItem key={page.name} disablePadding>
                     <ListItemButton
                       href={page.route}
                       onClick={() => { router.push(page.route); }}
                     >
-                      <ListItemText primary={page.name} />
+                      <ListItemText sx={{ fontFamily: "Futura Medium", }} primary={page.name} />
                     </ListItemButton>
                   </ListItem>
                 ))}
@@ -164,13 +162,13 @@ const Navbar = () => {
               display: { xs: 'flex', md: 'none' },
               flexGrow: 1,
               fontFamily: fahkwang.style.fontFamily,
-              fontWeight: 700,
-              letterSpacing: '.3rem',
+              // fontWeight: 700,
+              letterSpacing: '.6rem',
               color: 'inherit',
               textDecoration: 'none',
             }}
           >
-            Vansaya
+            VANSAYA
           </Typography>
         </Toolbar>
       </Container>
