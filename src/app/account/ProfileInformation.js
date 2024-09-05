@@ -44,24 +44,15 @@ function ProfileInformation({ userDetails, getUserDetails }) {
     });
 
 
-    useEffect(() => {
-        let data = {
-            firstName: userDetails?.firstName ? userDetails?.firstName : "",
-            lastName: userDetails?.lastName ? userDetails?.lastName : "",
-            email: userDetails?.email ? userDetails?.email : "",
-            mobileNumber: userDetails?.mobileNumber ? userDetails?.mobileNumber : "",
-        };
-        formik.setValues(data);
 
-    }, [userDetails])
 
     const userData = {
         firstName: userDetails?.firstName ? userDetails?.firstName : "",
         lastName: userDetails?.lastName ? userDetails?.lastName : "",
         email: userDetails?.email ? userDetails?.email : "",
-        mobileNumber: userDetails?.mobileNumber ? userDetails?.mobileNumber : "",
+        mobileNumber: userDetails?.phoneNumber ? userDetails?.phoneNumber.slice(3, userDetails?.phoneNumber.length) : "",
     };
-    
+
     const formik = useFormik({
         initialValues: userData,
         validationSchema: Yup.object({
@@ -194,9 +185,9 @@ function ProfileInformation({ userDetails, getUserDetails }) {
     const saveChanges = async (values) => {
         setIsLoading(true);
         try {
-            let payload = { ...values, mobileNumber: '+91' + values.mobileNumber }
-            let response = await axiosHttp.patch('/users/profile', values)
-            
+            let payload = { ...values,  phoneNumber: values.mobileNumber ? `+91${values.mobileNumber}` : values.mobileNumber}
+            let response = await axiosHttp.patch('/users/profile', payload)
+
             setSnackbarState((prev) => ({ message: response?.data?.message, open: true, type: 'success' }))
             setTimeout(() => {
                 setSnackbarState((prev) => ({ ...prev, open: false }))
@@ -251,7 +242,19 @@ function ProfileInformation({ userDetails, getUserDetails }) {
         }
     }, [otpVerified.new, otpVerified.old])
 
+    useEffect(() => {
+        let data = {
+            firstName: userDetails?.firstName ? userDetails?.firstName : "",
+            lastName: userDetails?.lastName ? userDetails?.lastName : "",
+            email: userDetails?.email ? userDetails?.email : "",
+            mobileNumber: userDetails?.phoneNumber ? userDetails?.phoneNumber.slice(3, userDetails?.phoneNumber.length) : "",
+        };
+        formik.setValues(data);
 
+    }, [userDetails])
+
+    console.log(userDetails, 'nigga details')
+    console.log(formik.values, 'nigga values')
     return (
         <Grid
             sx={{
