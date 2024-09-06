@@ -27,7 +27,7 @@ const fahkwang = Fahkwang({ subsets: ['latin'], weight: ['400'] });
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [token, setToken] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null); // State for Menu
+  const [anchorEl, setAnchorEl] = useState(null); 
   const open = Boolean(anchorEl);
   const router = useRouter();
 

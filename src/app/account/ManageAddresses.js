@@ -6,4 +6,4 @@ function ManageAddresses() {
   )
 }
 
-export default ManageAddresses
+export default ManageAddresses 
