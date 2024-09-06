@@ -17,7 +17,7 @@ import ListItemText from '@mui/material/ListItemText';
 import { Stack, Menu, MenuItem, Avatar } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import LoginIcon from '@mui/icons-material/Login';
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { pages } from '../../routes';
 import Cookies from 'js-cookie';
 import { AccountCircle, Logout } from '@mui/icons-material';
@@ -30,6 +30,7 @@ const Navbar = () => {
   const [anchorEl, setAnchorEl] = useState(null); 
   const open = Boolean(anchorEl);
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -141,7 +142,7 @@ const Navbar = () => {
                     key={page.name}
                     onClick={() => { router.push(page.route); }}
                     sx={{
-                      color: 'white',
+                      color: pathname === page.route ? '#e01fff' : 'white',
                       fontFamily: "Futura Medium"
                     }}
                   >
