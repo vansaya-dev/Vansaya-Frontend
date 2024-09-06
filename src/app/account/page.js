@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ProfileInformation from "./ProfileInformation";
 import ManageAddresses from "./ManageAddresses";
 import PanCardInformation from "./PanCardInformation";
@@ -9,24 +9,34 @@ import Grid from "@mui/material/Grid";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
+// import ListItemText from "@mui/material/ListItemText";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
-import Button from "@mui/material/Button";
+// import Button from "@mui/material/Button";
 import { Avatar, Divider, useMediaQuery } from "@mui/material";
+import axiosHttp from "../api/_api-interceptor";
 
 function Page() {
     const [selectedComponent, setSelectedComponent] = useState("Profile Information");
+    const [flagForData, setFlagForData] = useState(false);
+    const [userDetails, setUserDetails] = useState({});
     const accountOptions = ["Profile Information", "Manage Addresses", "PAN Card Information"];
     const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
 
+    useEffect(() => {
+
+        const data = localStorage.getItem('loggedInUserDetails');
+        if (data) {
+            setUserDetails(JSON.parse(data));
+        }
+    }, [flagForData]);
     // Function to render the selected component
     const renderComponent = () => {
         switch (selectedComponent) {
             case "Profile Information":
-                return <ProfileInformation />;
+                return <ProfileInformation userDetails={userDetails} getUserDetails={getUserDetails} />;
             case "Manage Addresses":
                 return <ManageAddresses />;
             case "PAN Card Information":
@@ -35,6 +45,22 @@ function Page() {
                 return <ProfileInformation />;
         }
     };
+
+    useEffect(() => { getUserDetails() }, [])
+
+    const getUserDetails = async () => {
+        try {
+
+            let response = await axiosHttp.get(`/users/profile`)
+            localStorage.setItem('loggedInUserDetails', JSON.stringify(response.data.data))
+            setFlagForData(!flagForData)
+        }
+        catch (error) {
+            console.log(error)
+        }
+    }
+
+
 
     return (
         <Box sx={{ minHeight: "100vh", bgcolor: "black", color: "white", p: 2 }}>
@@ -69,15 +95,26 @@ function Page() {
                             <CardContent>
                                 <Stack direction={"row"} gap={3}>
                                     <Avatar></Avatar>
-                                    <Typography
+                                    {userDetails?.firstName ? <Typography
                                         variant="h6"
                                         sx={{
                                             fontFamily: "Futura Medium",
                                         }}
                                         alignContent={"center"}
                                     >
-                                        John Doe
+                                        {userDetails?.firstName + " " + userDetails?.lastName}
                                     </Typography>
+                                        :
+                                        <Typography
+                                            variant="h6"
+                                            sx={{
+                                                fontFamily: "Futura Medium",
+                                            }}
+                                            alignContent={"center"}
+                                        >
+                                            {"Your Name"}
+                                        </Typography>
+                                    }
                                 </Stack>
                             </CardContent>
                         </Card>
@@ -115,10 +152,10 @@ function Page() {
                 <Grid item xs={12} md={0.5} sx={{ display: { xs: "none", md: "block" } }}>
                     <Divider
                         orientation="vertical"
-                        sx={{ 
+                        sx={{
                             height: '60%',
-                            mt:12
-                         }}
+                            mt: 12
+                        }}
                     />
                 </Grid>
 

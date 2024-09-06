@@ -260,6 +260,7 @@ function SignUp() {
                     setSnackbarState((prev) => ({ open: false }))
                     router.back();
                 }, 2500);
+                handleLogin(values);
 
             }
         }
@@ -288,14 +289,14 @@ function SignUp() {
 
                 setState((prev) => ({ ...prev, registerOtp: true }))
 
-                setOtpTime(10);
+                setOtpTime(30);
                 const intervalId = setInterval(() => {
                     setOtpTime((prev) => (prev - 1));
                 }, 1000);
 
                 setTimeout(() => {
                     clearInterval(intervalId);
-                }, 10000);
+                }, 30000);
 
 
                 setSnackbarState((prev) => ({ message: response?.data?.message, open: true, type: 'success' }))
@@ -334,6 +335,7 @@ function SignUp() {
 
                 Cookies.set('token', response.data.data, { expires: 7 });
                 formik.resetForm();
+                getUserDetails()
 
             }
         }
@@ -347,6 +349,19 @@ function SignUp() {
 
         setIsLoading(false);
     };
+
+    const getUserDetails = async () => {
+        try {
+
+            let response = await axiosHttp.get(`/users/profile`)
+            console.log(response.data.data, 'nigga response')
+            localStorage.setItem('loggedInUserDetails', JSON.stringify(response.data.data))
+        }
+        catch (error) {
+            console.log(error)
+        }
+    }
+
 
     const handleClickShowPassword = () => {
         setShowPassword(!showPassword);
@@ -375,14 +390,14 @@ function SignUp() {
 
                 setState((prev) => ({ ...prev, sendOtp: true }));
 
-                setOtpTime(10);
+                setOtpTime(30);
                 const intervalId = setInterval(() => {
                     setOtpTime((prev) => (prev - 1));
                 }, 1000);
 
                 setTimeout(() => {
                     clearInterval(intervalId);
-                }, 10000);
+                }, 30000);
 
                 setSnackbarState((prev) => ({ message: response?.data?.message, open: true, type: 'success' }))
 
@@ -448,9 +463,9 @@ function SignUp() {
                 style={{
                     objectFit: 'cover',
                     // zIndex: -1,
-                    opacity:0.09
+                    opacity: 0.09
                 }} />
-            <Stack sx={{zIndex:2}}>
+            <Stack sx={{ zIndex: 2 }}>
                 {!state.forgotPassword && !newPassword ?
                     <Stack m={2}>
 
@@ -533,68 +548,68 @@ function SignUp() {
                         <Stack mt={4} gap={1} width={'320px'}>
                             <FormikProvider value={formik}>
                                 {/* <ThemeProvider theme={theme}> */}
-                                    {state.phone ?
-                                        <Field name="phone">
-                                            {({ field }) => (
-                                                <TextField
-                                                    {...field}
-                                                    required
-                                                    id="standard-basic"
-                                                    label="Phone"
-                                                    disabled={state.registerOtp}
-                                                    type='number'
-                                                    variant="standard"
-                                                    sx={{
-                                                        '& .MuiInput-underline:after': {
-                                                            borderBottomColor: '#e01fff', // Color of the underline on focus
+                                {state.phone ?
+                                    <Field name="phone">
+                                        {({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                required
+                                                id="standard-basic"
+                                                label="Phone"
+                                                disabled={state.registerOtp}
+                                                type='number'
+                                                variant="standard"
+                                                sx={{
+                                                    '& .MuiInput-underline:after': {
+                                                        borderBottomColor: '#e01fff', // Color of the underline on focus
+                                                    },
+                                                    '& .MuiInputLabel-root:after': {
+                                                        color: 'white',
+                                                    },
+                                                    '& input[type=number]': {
+                                                        '-moz-appearance': 'textfield', // Firefox
+                                                        '&::-webkit-outer-spin-button': {
+                                                            '-webkit-appearance': 'none', // Chrome, Safari, Edge, Opera
+                                                            margin: 0,
                                                         },
-                                                        '& .MuiInputLabel-root:after': {
-                                                            color: 'white',
+                                                        '&::-webkit-inner-spin-button': {
+                                                            '-webkit-appearance': 'none', // Chrome, Safari, Edge, Opera
+                                                            margin: 0,
                                                         },
-                                                        '& input[type=number]': {
-                                                            '-moz-appearance': 'textfield', // Firefox
-                                                            '&::-webkit-outer-spin-button': {
-                                                                '-webkit-appearance': 'none', // Chrome, Safari, Edge, Opera
-                                                                margin: 0,
-                                                            },
-                                                            '&::-webkit-inner-spin-button': {
-                                                                '-webkit-appearance': 'none', // Chrome, Safari, Edge, Opera
-                                                                margin: 0,
-                                                            },
-                                                        },
-                                                    }}
-                                                    error={Boolean(formik.errors.phone && formik.touched.phone)}
-                                                    helperText={formik.touched.phone && formik.errors.phone}
-                                                />
-                                            )}
-                                        </Field>
-                                        :
+                                                    },
+                                                }}
+                                                error={Boolean(formik.errors.phone && formik.touched.phone)}
+                                                helperText={formik.touched.phone && formik.errors.phone}
+                                            />
+                                        )}
+                                    </Field>
+                                    :
 
-                                        <Field name="email">
-                                            {({ field }) => (
-                                                <TextField
-                                                    {...field}
-                                                    required
-                                                    disabled={state.registerOtp}
-                                                    id="standard-basic"
-                                                    label="Email"
-                                                    type='email'
-                                                    variant="standard"
-                                                    sx={{
-                                                        '& .MuiInput-underline:after': {
-                                                            borderBottomColor: '#e01fff', // Color of the underline on focus
-                                                        },
-                                                        '& .MuiInputLabel-root:after': {
-                                                            color: 'white',
-                                                        },
-                                                    }}
-                                                    error={Boolean(formik.errors.email && formik.touched.email)}
-                                                    helperText={formik.touched.email && formik.errors.email}
-                                                />
-                                            )}
-                                        </Field>
-                                    }
-                                    {/* {state.phone ?
+                                    <Field name="email">
+                                        {({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                required
+                                                disabled={state.registerOtp}
+                                                id="standard-basic"
+                                                label="Email"
+                                                type='email'
+                                                variant="standard"
+                                                sx={{
+                                                    '& .MuiInput-underline:after': {
+                                                        borderBottomColor: '#e01fff', // Color of the underline on focus
+                                                    },
+                                                    '& .MuiInputLabel-root:after': {
+                                                        color: 'white',
+                                                    },
+                                                }}
+                                                error={Boolean(formik.errors.email && formik.touched.email)}
+                                                helperText={formik.touched.email && formik.errors.email}
+                                            />
+                                        )}
+                                    </Field>
+                                }
+                                {/* {state.phone ?
                                     <Typography
                                         variant='caption'
                                         sx={{
@@ -623,94 +638,94 @@ function SignUp() {
                                         onClick={() => { !state.registerOtp && setState((prev) => ({ ...prev, phone: true })) }}
                                     >Phone number instead?
                                     </Typography>} */}
-                                    <Field name="password">
-                                        {({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                required
-                                                disabled={state.registerOtp}
-                                                id="standard-basic"
-                                                label="Password"
-                                                type={showPassword ? 'text' : 'password'}
-                                                variant="standard"
-                                                sx={{
-                                                    '& .MuiInput-underline:after': {
-                                                        borderBottomColor: '#e01fff', // Color of the underline on focus
-                                                    },
-                                                    '& .MuiInputLabel-root:after': {
-                                                        color: 'white',
-                                                    },
-                                                    mt: 3
-                                                }}
-                                                error={Boolean(formik.errors.password && formik.touched.password)}
-                                                helperText={formik.touched.password && formik.errors.password}
-                                                InputProps={{
-                                                    endAdornment: (
-                                                        <InputAdornment position="end">
-                                                            <IconButton
-                                                                sx={{
-                                                                    mr: 0
-                                                                }}
-                                                                onClick={handleClickShowPassword}
-                                                                onMouseDown={handleMouseDownPassword}
-                                                                edge="end"
-                                                            >
-                                                                {showPassword ? <VisibilityOff /> : <Visibility />}
-                                                            </IconButton>
-                                                        </InputAdornment>
-                                                    ),
-                                                }}
-                                            />
-                                        )}
-                                    </Field>
-                                    {state.registerOtp &&
-                                        <Stack mt={2} gap={1}>
-                                            <Typography
-                                                variant='caption'
-                                                sx={{
-                                                    color: '#b3b3b3',
-                                                    fontFamily: 'Futura light',
-                                                }}
-                                            >
-                                                Enter OTP(sent on email):
-                                            </Typography>
-                                            <OTPInput
-                                                value={formik.values.otp}
-                                                onChange={(newValue) => {
-                                                    formik.setFieldValue('otp', newValue)
-                                                }}
-                                                numInputs={6}
-                                                renderSeparator={<span style={{ margin: '0 5px' }}></span>}
-                                                renderInput={(props) => (
-                                                    <input
-                                                        {...props}
-                                                        style={{
-                                                            ...darkModeStyles,
-                                                            ...(props.focused ? focusStyles : {})
-                                                        }}
-                                                    />
-                                                )}
-                                            />
-                                            <Typography
-                                                variant='caption'
-                                                sx={{
-                                                    fontSize: '16px',
-                                                    // textDecoration: 'underline',
-                                                    cursor: otpTime === 0 && 'pointer',
-                                                    fontFamily: 'Futura light',
-                                                    textAlign: 'right',
-                                                    color: otpTime !== 0 ? '#b3b3b3' : 'white'
-                                                }}
-                                                onClick={() => {
-                                                    if (otpTime === 0) {
-                                                        sendForRegisterOtp(formik.values)
-                                                    }
-                                                }}
-                                            >
-                                                {otpTime === 0 ? "Resend OTP" : `Resend OTP in ${otpTime} seconds`}
-                                            </Typography>
-                                        </Stack>
-                                    }
+                                <Field name="password">
+                                    {({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            required
+                                            disabled={state.registerOtp}
+                                            id="standard-basic"
+                                            label="Password"
+                                            type={showPassword ? 'text' : 'password'}
+                                            variant="standard"
+                                            sx={{
+                                                '& .MuiInput-underline:after': {
+                                                    borderBottomColor: '#e01fff', // Color of the underline on focus
+                                                },
+                                                '& .MuiInputLabel-root:after': {
+                                                    color: 'white',
+                                                },
+                                                mt: 3
+                                            }}
+                                            error={Boolean(formik.errors.password && formik.touched.password)}
+                                            helperText={formik.touched.password && formik.errors.password}
+                                            InputProps={{
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <IconButton
+                                                            sx={{
+                                                                mr: 0
+                                                            }}
+                                                            onClick={handleClickShowPassword}
+                                                            onMouseDown={handleMouseDownPassword}
+                                                            edge="end"
+                                                        >
+                                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    )}
+                                </Field>
+                                {state.registerOtp &&
+                                    <Stack mt={2} gap={1}>
+                                        <Typography
+                                            variant='caption'
+                                            sx={{
+                                                color: '#b3b3b3',
+                                                fontFamily: 'Futura light',
+                                            }}
+                                        >
+                                            Enter OTP(sent on email):
+                                        </Typography>
+                                        <OTPInput
+                                            value={formik.values.otp}
+                                            onChange={(newValue) => {
+                                                formik.setFieldValue('otp', newValue)
+                                            }}
+                                            numInputs={6}
+                                            renderSeparator={<span style={{ margin: '0 5px' }}></span>}
+                                            renderInput={(props) => (
+                                                <input
+                                                    {...props}
+                                                    style={{
+                                                        ...darkModeStyles,
+                                                        ...(props.focused ? focusStyles : {})
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                        <Typography
+                                            variant='caption'
+                                            sx={{
+                                                fontSize: '16px',
+                                                // textDecoration: 'underline',
+                                                cursor: otpTime === 0 && 'pointer',
+                                                fontFamily: 'Futura light',
+                                                textAlign: 'right',
+                                                color: otpTime !== 0 ? '#b3b3b3' : 'white'
+                                            }}
+                                            onClick={() => {
+                                                if (otpTime === 0) {
+                                                    sendForRegisterOtp(formik.values)
+                                                }
+                                            }}
+                                        >
+                                            {otpTime === 0 ? "Resend OTP" : `Resend OTP in ${otpTime} seconds`}
+                                        </Typography>
+                                    </Stack>
+                                }
                                 {/* </ThemeProvider> */}
                             </FormikProvider>
                         </Stack>
@@ -789,76 +804,76 @@ function SignUp() {
                         <Stack mt={5} width={'320px'} gap={3}>
                             <FormikProvider value={formikForgot}>
                                 {/* <ThemeProvider theme={theme}> */}
-                                    <Field name="forgottedEmail">
-                                        {({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                required
-                                                disabled={state.sendOtp}
-                                                id="standard-basic"
-                                                label="Email"
-                                                variant="standard"
-                                                sx={{
-                                                    '& .MuiInput-underline:after': {
-                                                        borderBottomColor: '#e01fff', // Color of the underline on focus
-                                                    },
-                                                    '& .MuiInputLabel-root:after': {
-                                                        color: 'white',
-                                                    },
-                                                }}
-                                                error={Boolean(formikForgot.errors.forgottedEmail && formikForgot.touched.forgottedEmail)}
-                                                helperText={formikForgot.touched.forgottedEmail && formikForgot.errors.forgottedEmail}
-                                            />
-                                        )}
-                                    </Field>
-                                    {state.sendOtp &&
-                                        <Stack mt={2} gap={1}>
-                                            <Typography
-                                                variant='caption'
-                                                sx={{
-                                                    color: '#b3b3b3',
-                                                    fontFamily: 'Futura light',
-                                                }}
-                                            >
-                                                Enter OTP(sent on email):
-                                            </Typography>
-                                            <OTPInput
-                                                value={formikForgot.values.otp}
-                                                onChange={(newValue) => {
-                                                    formikForgot.setFieldValue('otp', newValue)
-                                                }}
-                                                numInputs={6}
-                                                renderSeparator={<span style={{ margin: '0 5px' }}></span>}
-                                                renderInput={(props) => (
-                                                    <input
-                                                        {...props}
-                                                        style={{
-                                                            ...darkModeStyles,
-                                                            ...(props.focused ? focusStyles : {})
-                                                        }}
-                                                    />
-                                                )}
-                                            />
-                                            <Typography
-                                                variant='caption'
-                                                sx={{
-                                                    fontSize: '16px',
-                                                    // textDecoration: 'underline',
-                                                    cursor: otpTime === 0 && 'pointer',
-                                                    fontFamily: 'Futura light',
-                                                    textAlign: 'right',
-                                                    color: otpTime !== 0 ? '#b3b3b3' : 'white'
-                                                }}
-                                                onClick={() => {
-                                                    if (otpTime === 0) {
-                                                        handleSendForgetOtp(formikForgot.values)
-                                                    }
-                                                }}
-                                            >
-                                                {otpTime === 0 ? "Resend OTP" : `Resend OTP in ${otpTime} seconds`}
-                                            </Typography>
-                                        </Stack>
-                                    }
+                                <Field name="forgottedEmail">
+                                    {({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            required
+                                            disabled={state.sendOtp}
+                                            id="standard-basic"
+                                            label="Email"
+                                            variant="standard"
+                                            sx={{
+                                                '& .MuiInput-underline:after': {
+                                                    borderBottomColor: '#e01fff', // Color of the underline on focus
+                                                },
+                                                '& .MuiInputLabel-root:after': {
+                                                    color: 'white',
+                                                },
+                                            }}
+                                            error={Boolean(formikForgot.errors.forgottedEmail && formikForgot.touched.forgottedEmail)}
+                                            helperText={formikForgot.touched.forgottedEmail && formikForgot.errors.forgottedEmail}
+                                        />
+                                    )}
+                                </Field>
+                                {state.sendOtp &&
+                                    <Stack mt={2} gap={1}>
+                                        <Typography
+                                            variant='caption'
+                                            sx={{
+                                                color: '#b3b3b3',
+                                                fontFamily: 'Futura light',
+                                            }}
+                                        >
+                                            Enter OTP(sent on email):
+                                        </Typography>
+                                        <OTPInput
+                                            value={formikForgot.values.otp}
+                                            onChange={(newValue) => {
+                                                formikForgot.setFieldValue('otp', newValue)
+                                            }}
+                                            numInputs={6}
+                                            renderSeparator={<span style={{ margin: '0 5px' }}></span>}
+                                            renderInput={(props) => (
+                                                <input
+                                                    {...props}
+                                                    style={{
+                                                        ...darkModeStyles,
+                                                        ...(props.focused ? focusStyles : {})
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                        <Typography
+                                            variant='caption'
+                                            sx={{
+                                                fontSize: '16px',
+                                                // textDecoration: 'underline',
+                                                cursor: otpTime === 0 && 'pointer',
+                                                fontFamily: 'Futura light',
+                                                textAlign: 'right',
+                                                color: otpTime !== 0 ? '#b3b3b3' : 'white'
+                                            }}
+                                            onClick={() => {
+                                                if (otpTime === 0) {
+                                                    handleSendForgetOtp(formikForgot.values)
+                                                }
+                                            }}
+                                        >
+                                            {otpTime === 0 ? "Resend OTP" : `Resend OTP in ${otpTime} seconds`}
+                                        </Typography>
+                                    </Stack>
+                                }
                                 {/* </ThemeProvider> */}
                             </FormikProvider>
                         </Stack>
@@ -914,82 +929,82 @@ function SignUp() {
                             <FormikProvider value={formikNewPassword}>
                                 {/* <ThemeProvider theme={theme}> */}
 
-                                    <Field name="newPassword">
-                                        {({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                required
-                                                type={showPassword ? 'text' : 'password'}
-                                                id="standard-basic"
-                                                label="New Password"
-                                                variant="standard"
-                                                sx={{
-                                                    '& .MuiInput-underline:after': {
-                                                        borderBottomColor: '#e01fff', // Color of the underline on focus
-                                                    },
-                                                    '& .MuiInputLabel-root:after': {
-                                                        color: 'white',
-                                                    },
-                                                }}
-                                                InputProps={{
-                                                    endAdornment: (
-                                                        <InputAdornment position="end">
-                                                            <IconButton
-                                                                sx={{
-                                                                    mr: 0
-                                                                }}
-                                                                onClick={handleClickShowPassword}
-                                                                onMouseDown={handleMouseDownPassword}
-                                                                edge="end"
-                                                            >
-                                                                {showPassword ? <VisibilityOff /> : <Visibility />}
-                                                            </IconButton>
-                                                        </InputAdornment>
-                                                    ),
-                                                }}
-                                                error={Boolean(formikNewPassword.errors.newPassword && formikNewPassword.touched.newPassword)}
-                                                helperText={formikNewPassword.touched.newPassword && formikNewPassword.errors.newPassword}
-                                            />
-                                        )}
-                                    </Field>
-                                    <Field name="confirmPassword">
-                                        {({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                required
-                                                id="standard-basic"
-                                                label="Confirm New Password"
-                                                variant="standard"
-                                                sx={{
-                                                    '& .MuiInput-underline:after': {
-                                                        borderBottomColor: '#e01fff', // Color of the underline on focus
-                                                    },
-                                                    '& .MuiInputLabel-root:after': {
-                                                        color: 'white',
-                                                    },
-                                                }}
-                                                type={showConfirmPassword ? 'text' : 'password'}
-                                                InputProps={{
-                                                    endAdornment: (
-                                                        <InputAdornment position="end">
-                                                            <IconButton
-                                                                sx={{
-                                                                    mr: 0
-                                                                }}
-                                                                onClick={handleClickShowConfirmPassword}
-                                                                onMouseDown={handleMouseDownPassword}
-                                                                edge="end"
-                                                            >
-                                                                {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                                                            </IconButton>
-                                                        </InputAdornment>
-                                                    ),
-                                                }}
-                                                error={Boolean(formikNewPassword.errors.confirmPassword && formikNewPassword.touched.confirmPassword)}
-                                                helperText={formikNewPassword.touched.confirmPassword && formikNewPassword.errors.confirmPassword}
-                                            />
-                                        )}
-                                    </Field>
+                                <Field name="newPassword">
+                                    {({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            required
+                                            type={showPassword ? 'text' : 'password'}
+                                            id="standard-basic"
+                                            label="New Password"
+                                            variant="standard"
+                                            sx={{
+                                                '& .MuiInput-underline:after': {
+                                                    borderBottomColor: '#e01fff', // Color of the underline on focus
+                                                },
+                                                '& .MuiInputLabel-root:after': {
+                                                    color: 'white',
+                                                },
+                                            }}
+                                            InputProps={{
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <IconButton
+                                                            sx={{
+                                                                mr: 0
+                                                            }}
+                                                            onClick={handleClickShowPassword}
+                                                            onMouseDown={handleMouseDownPassword}
+                                                            edge="end"
+                                                        >
+                                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                            error={Boolean(formikNewPassword.errors.newPassword && formikNewPassword.touched.newPassword)}
+                                            helperText={formikNewPassword.touched.newPassword && formikNewPassword.errors.newPassword}
+                                        />
+                                    )}
+                                </Field>
+                                <Field name="confirmPassword">
+                                    {({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            required
+                                            id="standard-basic"
+                                            label="Confirm New Password"
+                                            variant="standard"
+                                            sx={{
+                                                '& .MuiInput-underline:after': {
+                                                    borderBottomColor: '#e01fff', // Color of the underline on focus
+                                                },
+                                                '& .MuiInputLabel-root:after': {
+                                                    color: 'white',
+                                                },
+                                            }}
+                                            type={showConfirmPassword ? 'text' : 'password'}
+                                            InputProps={{
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <IconButton
+                                                            sx={{
+                                                                mr: 0
+                                                            }}
+                                                            onClick={handleClickShowConfirmPassword}
+                                                            onMouseDown={handleMouseDownPassword}
+                                                            edge="end"
+                                                        >
+                                                            {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                            error={Boolean(formikNewPassword.errors.confirmPassword && formikNewPassword.touched.confirmPassword)}
+                                            helperText={formikNewPassword.touched.confirmPassword && formikNewPassword.errors.confirmPassword}
+                                        />
+                                    )}
+                                </Field>
 
                                 {/* </ThemeProvider> */}
                             </FormikProvider>
