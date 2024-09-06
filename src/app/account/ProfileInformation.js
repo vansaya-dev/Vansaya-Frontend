@@ -99,7 +99,7 @@ function ProfileInformation({ userDetails, getUserDetails }) {
                 email: email,
             }
 
-            let response = await axiosHttp.post(`send-otp?new=${isNew}`, body);
+            let response = await axiosHttp.post(`send-otp?new=${isNew}&emch=${true}`, body);
 
             if (response.status == 200) {
                 if (isNew) {
@@ -140,7 +140,7 @@ function ProfileInformation({ userDetails, getUserDetails }) {
                 otp: otp
             }
 
-            let response = await axiosHttp.post(`/verify-otp?new=${isNew}`, body);
+            let response = await axiosHttp.post(`/verify-otp?new=${isNew}&emch=${true}`, body);
 
             if (response.status == 200) {
                 if (isNew) {
@@ -185,7 +185,7 @@ function ProfileInformation({ userDetails, getUserDetails }) {
     const saveChanges = async (values) => {
         setIsLoading(true);
         try {
-            let payload = { ...values,  phoneNumber: values.mobileNumber ? `+91${values.mobileNumber}` : values.mobileNumber}
+            let payload = { ...values, phoneNumber: values.mobileNumber ? `+91${values.mobileNumber}` : values.mobileNumber }
             let response = await axiosHttp.patch('/users/profile', payload)
 
             setSnackbarState((prev) => ({ message: response?.data?.message, open: true, type: 'success' }))
@@ -253,8 +253,6 @@ function ProfileInformation({ userDetails, getUserDetails }) {
 
     }, [userDetails])
 
-    console.log(userDetails, 'nigga details')
-    console.log(formik.values, 'nigga values')
     return (
         <Grid
             sx={{

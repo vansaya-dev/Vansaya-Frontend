@@ -142,8 +142,9 @@ const Navbar = () => {
                     key={page.name}
                     onClick={() => { router.push(page.route); }}
                     sx={{
-                      color: pathname === page.route ? '#e01fff' : 'white',
-                      fontFamily: "Futura Medium"
+                      color: 'white',
+                      fontFamily: "Futura Medium",
+                      bgcolor: pathname === page.route ? 'rgba(255, 255, 255, 0.1)' : ''
                     }}
                   >
                     {page.name}
