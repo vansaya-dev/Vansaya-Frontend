@@ -127,7 +127,7 @@ const ManageAddresses = ({ userDetails, getUserDetails }) => {
 
 
   useEffect(() => {
-    if (userDetails.address.length) {
+    if (userDetails?.address?.length) {
       setAddresses(userDetails.address?.map((item) => (
         {
           ...item,
@@ -139,7 +139,7 @@ const ManageAddresses = ({ userDetails, getUserDetails }) => {
     else {
       setAddresses([])
     }
-  }, [userDetails.address])
+  }, [userDetails])
 
 
   return (
