@@ -353,7 +353,7 @@ function SignUp() {
     const getUserDetails = async () => {
         try {
 
-            let response = await axiosHttp.get(`/users/profile`)
+            let response = await axiosHttp.get(`/users/profile?auth=${true}`)
             console.log(response.data.data, 'nigga response')
             localStorage.setItem('loggedInUserDetails', JSON.stringify(response.data.data))
         }
