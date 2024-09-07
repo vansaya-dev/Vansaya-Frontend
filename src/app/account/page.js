@@ -15,12 +15,17 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 // import Button from "@mui/material/Button";
-import { Avatar, Divider, useMediaQuery } from "@mui/material";
+import { Alert, Avatar, Divider, Snackbar, useMediaQuery } from "@mui/material";
 import axiosHttp from "../api/_api-interceptor";
 
 function Page() {
     const [selectedComponent, setSelectedComponent] = useState("Profile Information");
     const [flagForData, setFlagForData] = useState(false);
+    const [userState, setUserState] = useState()
+    const [snackbarState, setSnackbarState] = useState({
+        open: false,
+        message: '',
+    });
     const [userDetails, setUserDetails] = useState({});
     const accountOptions = ["Profile Information", "Manage Addresses", "PAN Card Information"];
     const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
@@ -38,7 +43,7 @@ function Page() {
             case "Profile Information":
                 return <ProfileInformation userDetails={userDetails} getUserDetails={getUserDetails} />;
             case "Manage Addresses":
-                return <ManageAddresses />;
+                return <ManageAddresses userDetails={userState} getUserDetails={getUserDetails} />;
             case "PAN Card Information":
                 return <PanCardInformation />;
             default:
@@ -51,12 +56,21 @@ function Page() {
     const getUserDetails = async () => {
         try {
 
-            let response = await axiosHttp.get(`/users/profile`)
+            let response = await axiosHttp.get(`/users/profile?auth=${true}`)
             localStorage.setItem('loggedInUserDetails', JSON.stringify(response.data.data))
+            setUserState(response.data.data)
             setFlagForData(!flagForData)
+            // setSnackbarState((prev) => ({ message: response?.data?.message, open: true, type: 'success' }))
+            // setTimeout(() => {
+            //     setSnackbarState((prev) => ({ ...prev, open: false }))
+            // }, 2500);
         }
         catch (error) {
             console.log(error)
+            setSnackbarState((prev) => ({ message: error?.response?.data?.message, open: true, type: 'error' }))
+            setTimeout(() => {
+                setSnackbarState((prev) => ({ ...prev, open: false }))
+            }, 2500);
         }
     }
 
@@ -164,6 +178,18 @@ function Page() {
                     {renderComponent()}
                 </Grid>
             </Grid>
+            <Snackbar
+                open={snackbarState.open}
+                autoHideDuration={4000}
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'center',
+                }}
+            >
+                <Alert severity={snackbarState.type} sx={{ width: '100%' }}>
+                    {snackbarState.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 }
