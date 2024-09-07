@@ -88,7 +88,7 @@ const Navbar = () => {
                 color="inherit"
                 onClick={handleMenuClick} // Opens menu
               >
-                <AccountCircle />
+                <AccountCircle fontSize='large'/>
               </IconButton>
             }
 
