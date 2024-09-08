@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import ProfileInformation from "./ProfileInformation";
 import ManageAddresses from "./ManageAddresses";
-import PanCardInformation from "./PanCardInformation";
+import AadharCardInformation from "./AadharCardInformation";
 
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -27,7 +27,7 @@ function Page() {
         message: '',
     });
     const [userDetails, setUserDetails] = useState({});
-    const accountOptions = ["Profile Information", "Manage Addresses", "PAN Card Information"];
+    const accountOptions = ["Profile Information", "Manage Addresses", "Aadhar Card Information"];
     const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
 
     useEffect(() => {
@@ -44,8 +44,8 @@ function Page() {
                 return <ProfileInformation userDetails={userDetails} getUserDetails={getUserDetails} />;
             case "Manage Addresses":
                 return <ManageAddresses userDetails={userState} getUserDetails={getUserDetails} />;
-            case "PAN Card Information":
-                return <PanCardInformation />;
+            case "Aadhar Card Information":
+                return <AadharCardInformation userDetails={userState} getUserDetails={getUserDetails} />;
             default:
                 return <ProfileInformation />;
         }
